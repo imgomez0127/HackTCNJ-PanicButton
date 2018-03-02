@@ -25,28 +25,19 @@ import android.webkit.PermissionRequest;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import java.math.BigInteger;
-
 import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity  {
-
     NfcAdapter nfcAdapter;
     PendingIntent pendingIntent;
-
     static ArrayList<String> temp = new ArrayList<>();
     EditText text;
     EditText textR;
-
     int touches = 0;
-
     public static  String  tagId = " ";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         Log.d("NFCAPP", " On create called in the main activity");
@@ -55,13 +46,9 @@ public class MainActivity extends AppCompatActivity  {
             Log.d("NFCAPP", "NFC not supported in the device. Exiting");
             return;
         }
-
         Intent intent = new Intent(this, this.getClass());
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
         pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-
         Button button = findViewById(R.id.addNumber);
         text = findViewById(R.id.editText);
         button.setOnClickListener(new View.OnClickListener() {
@@ -83,72 +70,50 @@ public class MainActivity extends AppCompatActivity  {
                     temp.add(text.getText().toString());
                     System.out.println(text.getText().toString());
                     Toast.makeText(getApplicationContext(), "Number Stored, enter new number if desired", Toast.LENGTH_LONG).show();
-
                 }
                 if (text.getText().toString() == " ") {
                     Toast.makeText(getApplicationContext(), "Enter a number", Toast.LENGTH_SHORT).show();
-
                 }
-
             }
-
         });
-
-
-
-
     }
-
     void sendSMSB(String[] numberArr, String message){
         for(int i = 0; i<numberArr.length; i++) {
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(numberArr[i], null, message, null, null);
         }
     }
-
     @Override
     protected void onResume() {
         super.onResume();
         nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
     }
-
     @Override
     protected void onPause() {
         super.onPause();
         if (nfcAdapter != null)
             nfcAdapter.disableForegroundDispatch(this);
     }
-
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Log.d("NFCAPP", "Got new Intent");
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
         String receivedTagId = bin2hex(tag.getId());
-
         tagId = receivedTagId;
-
         PackageManager pm = this.getPackageManager();
-
         if (pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
             System.out.println("Supported");
         } else {
             System.out.println("nope");
         }
-
         Log.d("NFCAPP", "The tag contains : " + tag);
         Log.d("NFCAPP", "The tag ID : " + receivedTagId);
         Log.d("NFCAPP", "The tag tech list : " + tag.getTechList());
-
         String[] perms = {"android.permission.SEND_SMS","android.permission.CALL_PHONE"};
-
         int permsRequestCode = 200;
-
         this.requestPermissions(perms,permsRequestCode);
-
         touches++;
-
             if (receivedTagId.equals(tagId) && touches == 1 || touches > 2) {
                 System.out.println(touches+" Touches");
                 String messageStr = "I am uncomfortable in my current location, please help me,:";
@@ -176,4 +141,3 @@ public class MainActivity extends AppCompatActivity  {
         return String.format("%0" + (data.length * 2) + "X", new BigInteger(1, data));
     }
 }
-
